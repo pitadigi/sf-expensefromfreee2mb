@@ -152,10 +152,10 @@
     <enableSearch>false</enableSearch>
     <enableSharing>false</enableSharing>
     <enableStreamingApi>false</enableStreamingApi>
-    <label>経費明細</label>
+    <label>Freee経費明細</label>
     <nameField>
         <displayFormat>{0}</displayFormat>
-        <label>経費明細ID</label>
+        <label>FreeeExpenseDetail名</label>
         <type>AutoNumber</type>
     </nameField>
     <searchLayouts/>

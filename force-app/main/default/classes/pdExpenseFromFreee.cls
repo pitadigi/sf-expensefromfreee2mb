@@ -11,7 +11,7 @@ public with sharing class pdExpenseFromFreee {
         List<AccountInfo> lstAccountInfo = getAccountInfo(companyId);
 
         // 半年分の経費明細を取得する
-        String expenseDetail = '計上日,発生日,勘定科目,金額,備考\r\n';
+        String expenseDetail = '種別,計上日,発生日,勘定科目,金額,備考\r\n';
         for(Integer i=0 ; i<months ; i++){
             Date startDate = Date.today().toStartOfMonth().addMonths(i * (-1));
             Date endDate = startDate.addMonths(1).addDays(-1);
@@ -19,7 +19,38 @@ public with sharing class pdExpenseFromFreee {
             expenseDetail += getExpense(companyId, lstAccountInfo, startDate, endDate);
         }
 
-        System.debug(expenseDetail);
+        // 経費明細レコードを作成する
+        FreeeExpenseDetail__c fed = new FreeeExpenseDetail__c();
+        insert fed;
+
+        // 経費明細CSVファイルを添付ファイルとして保存する
+        AttatchFile(fed.Id, expenseDetail);
+    }
+
+    private static void AttatchFile(Id recordId, String content) {
+        // ドキュメントを作成する
+        ContentVersion cv = new ContentVersion();
+        // ファイルはSalesforce上に保存
+        cv.ContentLocation = 'S';
+        // ファイル名
+        cv.PathOnClient = 'expense.csv';
+        // ファイルタイトル
+        cv.Title = '経費明細';
+        // ファイルの内容
+        cv.VersionData = Blob.valueOf(content);
+        insert cv;
+
+        // 登録したファイルのドキュメントIDを取得する
+        Id docId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id =:cv.Id].ContentDocumentId;
+
+        // レコードとドキュメントをリンクする
+        ContentDocumentLink cde = new ContentDocumentLink();
+        cde.ContentDocumentId = docId;
+        cde.LinkedEntityId = recordId;
+        cde.ShareType = 'V';
+        // cde.Visibility = 'InternalUsers';
+        insert cde;
+
     }
 
     /**
@@ -97,6 +128,7 @@ public with sharing class pdExpenseFromFreee {
         parameters += '&type=expense';
         parameters += '&start_issue_date=' + startDate.format().replace('/', '-');
         parameters += '&end_issue_date=' + endDate.format().replace('/', '-');
+        parameters += '&limit=100';
 
         HttpRequest req = new HttpRequest();
         req.setEndpoint(path + '?' + parameters);
@@ -107,6 +139,7 @@ public with sharing class pdExpenseFromFreee {
         // 正常に返って来たら経費明細CSVを作成する
         String expenseDetail = '';
         if(res.getStatusCode() == 200) {
+            System.debug(res.getBody());
             Map<String, Object> mapBody = (Map<String, Object>)JSON.deserializeUntyped(res.getBody());
             List<Object> lstDeals = (List<Object>)mapBody.get('deals');
             for(Object deal : lstDeals) {
@@ -116,6 +149,7 @@ public with sharing class pdExpenseFromFreee {
                     Map<String, Object> mapDetail = (Map<String, Object>)detail;
 
                     // 経費明細データをCSV形式で作成する
+                    expenseDetail += '-----data-----,';
                     // 計上日
                     expenseDetail += Date.valueOf((String)mapDeal.get('issue_date')).toStartOfMonth().format() + ',';
                     // 発生日
@@ -125,7 +159,11 @@ public with sharing class pdExpenseFromFreee {
                     // 金額
                     expenseDetail += String.valueOf((Integer)mapDetail.get('amount')) + ',';
                     // 備考
-                    expenseDetail += ((String)mapDetail.get('description')).replace(',', '、').replace('¥"', '”');
+                    String description = (String)mapDetail.get('description');
+                    if (description == null) {
+                        description = '';
+                    }
+                    expenseDetail += description.replace(',', '、').replace('¥"', '”');
                     expenseDetail += '\r\n';
                 }
             }

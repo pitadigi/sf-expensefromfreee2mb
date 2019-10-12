@@ -15,9 +15,9 @@ package.xml
 **/flexipages/**
 **/profiles/**
 **/tabs/**
-**/customMetadata/**
 **/layouts/**
 **/authproviders/**
 **/namedCredentials/**
 **/remoteSiteSettings/**
 **/permissionsets/**
+**/reportTypes/**
