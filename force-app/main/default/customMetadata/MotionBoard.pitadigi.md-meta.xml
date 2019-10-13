@@ -7,6 +7,14 @@
         <value xsi:type="xsd:string">^Le.4Y#SnonO1Aqt}&gt;kH+JtHB[UW*K</value>
     </values>
     <values>
+        <field>TenantId__c</field>
+        <value xsi:type="xsd:string">c1761tsv</value>
+    </values>
+    <values>
+        <field>Url__c</field>
+        <value xsi:type="xsd:string">https://cloud-up.motionboard.jp/motionboard/rest/</value>
+    </values>
+    <values>
         <field>UserId__c</field>
         <value xsi:type="xsd:string">kmatae@local</value>
     </values>
