@@ -2,7 +2,7 @@ public with sharing class pdExpenseFromFreee {
     /**
     * 取引(支出)を取得する
      */
-    @AuraEnabled
+    @future(callout=true) 
     public static void getExpenseInfo(Integer months) {
         // MotionBoard上の経費明細データを削除する
         eraseExpense();

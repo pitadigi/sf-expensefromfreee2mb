@@ -1,4 +1,5 @@
 public with sharing class pdQuota2MB {
+    @future(callout=true) 
     public static void sendQuota() {
         // 期間情報を取得する
         List<Period> p = [SELECT Id,StartDate,EndDate FROM Period];

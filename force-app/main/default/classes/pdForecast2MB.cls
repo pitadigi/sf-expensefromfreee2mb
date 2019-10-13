@@ -1,4 +1,5 @@
 public with sharing class pdForecast2MB {
+    @future(callout=true) 
     public static void sendForecast() {
         // 期間情報を取得する
         List<Period> p = [SELECT Id,StartDate,EndDate FROM Period];
